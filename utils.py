@@ -1,15 +1,7 @@
 from sqlmodel import create_engine, SQLModel, Session, select
 
 from globals import Globals
-from models import ChatMember
-
-
-# def get_all_models() -> list:
-#     import sys
-#     import inspect
-#     classes = inspect.getmembers(sys.modules["models"], inspect.isclass)
-#     classes = [a[1] for a in classes if a[0] != "BaseModel"]
-#     return classes
+from models import ChatMember, User
 
 
 def init_db():
@@ -24,7 +16,7 @@ def init_db():
 
 def get_chatmember_or_none(chat_id: int,
                            user_id: int
-                           ) -> ChatMember:
+                           ) -> ChatMember | None:
 
     engine = Globals.db_engine
     with Session(engine) as session:
@@ -47,7 +39,24 @@ async def create_chatmember(chat_id: int,
     return chat_member
 
 
-async def save_model(model: SQLModel) -> None:
+def get_user_or_none(user_id: int) -> User | None:
+    engine = Globals.db_engine
+    with Session(engine) as session:
+        statement = select(User).where(User.user_id == user_id)
+        user = session.exec(statement).first()
+    return user
+
+
+def create_user(user_id: int) -> User | None:
+    engine = Globals.db_engine
+    with Session(engine) as session:
+        user = User(user_id=user_id)
+        session.add(user)
+        session.commit()
+    return user
+
+
+def save_model(model: SQLModel) -> None:
     engine = Globals.db_engine
     with Session(engine) as session:
         session.add(model)

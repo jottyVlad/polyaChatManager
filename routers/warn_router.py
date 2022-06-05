@@ -50,7 +50,7 @@ async def warn_handler(message: types.Message):
         user.warns += 1
         await message.reply(f"Варн [{user.warns}/3] выдан пользователю")
 
-        await save_model(user)
+        save_model(user)
 
 
 @warn_router.message(commands=["remwarn"])
@@ -73,4 +73,4 @@ async def remwarn_handler(message: types.Message):
         await message.reply(f"Варн у пользователя снят, "
                             f"теперь их [{user.warns}/3]")
 
-        await save_model(user)
+        save_model(user)
