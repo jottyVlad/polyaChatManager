@@ -23,8 +23,8 @@ async def warn_handler(message: types.Message):
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека которого нужно заварнить")
 
-    user = await get_chatmember_or_none(chat_id=message.chat.id,
-                                        user_id=message.reply_to_message.from_user.id)
+    user = get_chatmember_or_none(chat_id=message.chat.id,
+                                  user_id=message.reply_to_message.from_user.id)
 
     if not user:
         await create_chatmember(chat_id=message.chat.id,
@@ -56,8 +56,8 @@ async def remwarn_handler(message: types.Message):
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека которого нужно заварнить")
 
-    user = await get_chatmember_or_none(chat_id=message.chat.id,
-                                        user_id=message.reply_to_message.from_user.id)
+    user = get_chatmember_or_none(chat_id=message.chat.id,
+                                  user_id=message.reply_to_message.from_user.id)
 
     if not user:
         await message.reply("У пользователя отсутствуют варны!")

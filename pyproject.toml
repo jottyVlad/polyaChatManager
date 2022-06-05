@@ -8,7 +8,7 @@ authors = ["jotty <bard143games@gmail.com>"]
 python = "^3.9"
 aiogram = "^3.0.0a18"
 python-dotenv = "*"
-tortoise-orm = "*"
+sqlmodel = "*"
 
 [tool.poetry.dev-dependencies]
 
