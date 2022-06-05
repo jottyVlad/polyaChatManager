@@ -48,8 +48,7 @@ async def unmute_handler(message: types.Message):
         await message.reply("Нельзя размьютить администратора")
         return
 
-    permissions = ChatPermissions()
-    permissions.can_send_messages = True
+    permissions = (await bot.get_chat(message.chat.id)).permissions
 
     await bot.restrict_chat_member(message.chat.id,
                                    message.reply_to_message.from_user.id,
