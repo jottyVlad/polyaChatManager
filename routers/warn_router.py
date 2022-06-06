@@ -23,6 +23,13 @@ async def warn_handler(message: types.Message):
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека, которого нужно заварнить")
 
+    if message.reply_to_message.from_user.id == message.from_user.id:
+        await message.reply("Нельзя заварнить себя")
+        return
+    if message.reply_to_message.from_user.id == (await bot.me()).id:
+        await message.reply("Нельзя заварнить меня, я ведь и обидеться могу =(")
+        return
+
     user = get_chatmember_or_none(chat_id=message.chat.id,
                                   user_id=message.reply_to_message.from_user.id)
 
@@ -55,8 +62,16 @@ async def warn_handler(message: types.Message):
 
 @warn_router.message(commands=["remwarn"])
 async def remwarn_handler(message: types.Message):
+    bot = Bot.get_current()
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека которого нужно заварнить")
+        return
+
+    if message.reply_to_message.from_user.id == message.from_user.id:
+        await message.reply("Нельзя разварнить себя, хех...")
+        return
+    if message.reply_to_message.from_user.id == (await bot.me()).id:
+        await message.reply("Нельзя разварнить меня, я и так без варнов =)")
         return
 
     user = get_chatmember_or_none(chat_id=message.chat.id,

@@ -9,6 +9,7 @@ python = "^3.10"
 aiogram = "^3.0.0a18"
 python-dotenv = "*"
 sqlmodel = "*"
+alembic = "*"
 
 [tool.poetry.dev-dependencies]
 
