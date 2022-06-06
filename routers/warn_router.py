@@ -13,26 +13,35 @@ warn_router.message.bind_filter(UserAdminPermissionRequired)
 @warn_router.message(commands=["warn"])
 async def warn_handler(message: types.Message):
     bot = Bot.get_current()
-    admins = [i.user for i in await bot.get_chat_administrators(message.chat.id)]
-    is_bot_admin = await bot.get_me() in admins
-    if not is_bot_admin:
+    # admins = [i.user for i in await bot.get_chat_administrators(message.chat.id)]
+    is_admin = (await bot.get_chat_member(message.chat.id, (await bot.me()).id)).status == "administrator"
+    if not is_admin:
         await message.reply("Если у бота нет прав администратора, "
-                            "то по достижении максимального количества варнов 3/3 "
-                            "у пользователя он не сможет его забанить!")
+                            "то, по достижении максимального количества варнов [3/3] "
+                            "у пользователя, он не сможет его забанить!")
 
     if not message.reply_to_message:
-        await message.reply("Перешлите сообщение человека которого нужно заварнить")
+        await message.reply("Перешлите сообщение человека, которого нужно заварнить")
 
-    user = await get_chatmember_or_none(chat_id=message.chat.id,
-                                        user_id=message.reply_to_message.from_user.id)
+    if message.reply_to_message.from_user.id == message.from_user.id:
+        await message.reply("Нельзя заварнить себя")
+        return
+    if message.reply_to_message.from_user.id == (await bot.me()).id:
+        await message.reply("Нельзя заварнить меня, я ведь и обидеться могу =(")
+        return
+
+    user = get_chatmember_or_none(chat_id=message.chat.id,
+                                  user_id=message.reply_to_message.from_user.id)
 
     if not user:
         await create_chatmember(chat_id=message.chat.id,
                                 user_id=message.reply_to_message.from_user.id,
                                 warns=1)
+        await message.reply(f"Варн [{user.warns}/3] выдан пользователю "
+                            f"{message.reply_to_message.from_user.first_name}")
 
     elif user.warns >= 2:
-        if is_bot_admin:
+        if is_admin:
             await bot.ban_chat_member(message.chat.id,
                                       message.reply_to_message.from_user.id)
 
@@ -48,16 +57,25 @@ async def warn_handler(message: types.Message):
         user.warns += 1
         await message.reply(f"Варн [{user.warns}/3] выдан пользователю")
 
-        await save_model(user)
+        save_model(user)
 
 
 @warn_router.message(commands=["remwarn"])
 async def remwarn_handler(message: types.Message):
+    bot = Bot.get_current()
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека которого нужно заварнить")
+        return
 
-    user = await get_chatmember_or_none(chat_id=message.chat.id,
-                                        user_id=message.reply_to_message.from_user.id)
+    if message.reply_to_message.from_user.id == message.from_user.id:
+        await message.reply("Нельзя разварнить себя, хех...")
+        return
+    if message.reply_to_message.from_user.id == (await bot.me()).id:
+        await message.reply("Нельзя разварнить меня, я и так без варнов =)")
+        return
+
+    user = get_chatmember_or_none(chat_id=message.chat.id,
+                                  user_id=message.reply_to_message.from_user.id)
 
     if not user:
         await message.reply("У пользователя отсутствуют варны!")
@@ -70,4 +88,4 @@ async def remwarn_handler(message: types.Message):
         await message.reply(f"Варн у пользователя снят, "
                             f"теперь их [{user.warns}/3]")
 
-        await save_model(user)
+        save_model(user)

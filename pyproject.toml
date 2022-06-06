@@ -5,10 +5,11 @@ description = ""
 authors = ["jotty <bard143games@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 aiogram = "^3.0.0a18"
 python-dotenv = "*"
-tortoise-orm = "*"
+sqlmodel = "*"
+alembic = "*"
 
 [tool.poetry.dev-dependencies]
 

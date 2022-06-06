@@ -9,7 +9,6 @@ roleplay_router.message.bind_filter(ChatType)
 
 async def process_roleplay_command(message: types.Message, text: str):
     if message.reply_to_message:
-        print(5)
         await message.reply(f"{message.from_user.first_name} {text} {message.reply_to_message.from_user.first_name}")
         return
 

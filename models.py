@@ -1,9 +1,14 @@
-from tortoise.models import Model
-from tortoise import fields
+from sqlmodel import Field, SQLModel
 
 
-class ChatMember(Model):
-    id = fields.IntField(pk=True)
-    chat_id = fields.IntField()
-    user_id = fields.IntField()
-    warns = fields.IntField(default=0)
+class User(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    user_id: int
+    money: int = Field(default=0)
+
+
+class ChatMember(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    chat_id: int
+    user_id: int
+    warns: int = Field(default=0)
