@@ -1,4 +1,3 @@
 .idea/
 .env
 bot.db
-poetry.lock
