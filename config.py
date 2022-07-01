@@ -7,3 +7,4 @@ if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+SENTRY_DSN = os.getenv("SENTRY_DSN")

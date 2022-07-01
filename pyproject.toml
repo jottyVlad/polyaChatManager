@@ -10,6 +10,7 @@ aiogram = "^3.0.0a18"
 python-dotenv = "*"
 sqlmodel = "*"
 alembic = "*"
+sentry-sdk = "*"
 
 [tool.poetry.dev-dependencies]
 
