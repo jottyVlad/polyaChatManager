@@ -9,14 +9,25 @@ roleplay_router.message.bind_filter(ChatType)
 
 
 async def process_roleplay_command(message: types.Message, text: str, smile: Optional[str] = None):
+    additional = ""
+    if len(message.text.split()) > 1:
+        additional = " ".join(message.text.split()[1:])
+
     if message.reply_to_message:
-        await message.reply(f"{message.from_user.first_name} "
-                            f"{text} {message.reply_to_message.from_user.first_name} {smile}")
+        if additional:
+            answer = f"{message.from_user.first_name} " \
+                     f"{text} {message.reply_to_message.from_user.first_name} " \
+                     f"{additional} {smile}"
+        else:
+            answer = f"{message.from_user.first_name} " \
+                     f"{text} {message.reply_to_message.from_user.first_name} {smile}"
+
+        await message.reply(answer)
         return
 
-    if len(splitted := message.text.split()) > 1:
-        await message.reply(f"{message.from_user.first_name} "
-                            f"{text} {' '.join(splitted[1:])} {smile}")
+    # if len(splitted := message.text.split()) > 1:
+    #     await message.reply(f"{message.from_user.first_name} "
+    #                         f"{text} {' '.join(splitted[1:])} {smile}")
 
 
 @roleplay_router.message(text_startswith=["трахнуть"], text_ignore_case=True)
