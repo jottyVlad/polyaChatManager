@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Optional
 
 from aiogram import Router, types
@@ -6,6 +7,34 @@ from filters.chattype_filter import ChatType
 
 roleplay_router = Router()
 roleplay_router.message.bind_filter(ChatType)
+
+
+@dataclasses.dataclass
+class RoleplayCommandSettings:
+    text: str
+    smile: str
+    is_nsfw: bool
+
+
+roleplay_commands: dict[str, RoleplayCommandSettings] = {
+    "трахнуть": RoleplayCommandSettings(
+        text="трахнул(-а)", smile="🥰", is_nsfw=True
+    ),
+    "выебать": RoleplayCommandSettings(
+        text="жёстко выебал(-а)", smile="😍", is_nsfw=True
+    ),
+    "обнять": RoleplayCommandSettings(
+        text="обнял(-а)", smile="😊", is_nsfw=False
+    ),
+    "поцеловать": RoleplayCommandSettings(
+        text="поцеловал(-а)", smile="😘", is_nsfw=False
+    ),
+    "въебать": RoleplayCommandSettings(
+        text="въебал(-а)", smile="😈", is_nsfw=True),
+    "ударить": RoleplayCommandSettings(
+        text="ударил(-а)", smile="😈", is_nsfw=False
+    )
+}
 
 
 async def process_roleplay_command(message: types.Message, text: str, smile: Optional[str] = None):
@@ -25,21 +54,13 @@ async def process_roleplay_command(message: types.Message, text: str, smile: Opt
         await message.reply(answer)
         return
 
-    # if len(splitted := message.text.split()) > 1:
-    #     await message.reply(f"{message.from_user.first_name} "
-    #                         f"{text} {' '.join(splitted[1:])} {smile}")
 
-
-@roleplay_router.message(text_startswith=["трахнуть"], text_ignore_case=True)
-async def trahnut_handler(message: types.Message):
-    await process_roleplay_command(message, "трахнул(-а)", "🥰")
-
-
-@roleplay_router.message(text_startswith=["обнять"], text_ignore_case=True)
-async def hug_handler(message: types.Message):
-    await process_roleplay_command(message, "обнял(-а)", "😊")
-
-
-@roleplay_router.message(text_startswith=["поцеловать"], text_ignore_case=True)
-async def kiss_handler(message: types.Message):
-    await process_roleplay_command(message, "поцеловал(-а)", "😘")
+@roleplay_router.message(text_startswith=list(roleplay_commands.keys()), text_ignore_case=True)
+async def roleplay_handler(message: types.Message):
+    try:
+        command = roleplay_commands[message.text.split()[0].lower()]
+        await process_roleplay_command(message,
+                                       command.text,
+                                       command.smile)
+    except KeyError:
+        return
