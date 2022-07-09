@@ -13,7 +13,6 @@ warn_router.message.bind_filter(UserAdminPermissionRequired)
 @warn_router.message(commands=["warn"])
 async def warn_handler(message: types.Message):
     bot = Bot.get_current()
-    # admins = [i.user for i in await bot.get_chat_administrators(message.chat.id)]
     is_admin = (await bot.get_chat_member(message.chat.id, (await bot.me()).id)).status == "administrator"
     if not is_admin:
         await message.reply("Если у бота нет прав администратора, "
@@ -34,9 +33,9 @@ async def warn_handler(message: types.Message):
                                   user_id=message.reply_to_message.from_user.id)
 
     if not user:
-        await create_chatmember(chat_id=message.chat.id,
-                                user_id=message.reply_to_message.from_user.id,
-                                warns=1)
+        user = await create_chatmember(chat_id=message.chat.id,
+                                       user_id=message.reply_to_message.from_user.id,
+                                       warns=1)
         await message.reply(f"Варн [{user.warns}/3] выдан пользователю "
                             f"{message.reply_to_message.from_user.first_name}")
 
@@ -89,3 +88,30 @@ async def remwarn_handler(message: types.Message):
                             f"теперь их [{user.warns}/3]")
 
         save_model(user)
+
+
+@warn_router.message(commands=["warns"])
+async def warns_handler(message: types.Message):
+    bot = Bot.get_current()
+    if not message.reply_to_message \
+            or message.reply_to_message.from_user.id == message.from_user.id:
+        user = get_chatmember_or_none(chat_id=message.chat.id,
+                                      user_id=message.from_user.id)
+
+        if not user:
+            await message.reply("У пользователя отстутствуют варны!")
+            return
+        await message.reply(f"У пользователя {message.from_user.first_name} [{user.warns}/3] варнов!")
+        return
+    elif message.reply_to_message.from_user.id == (await bot.me()).id:
+        await message.reply("У меня нет варнов, очевидно")
+        return
+
+    user = get_chatmember_or_none(chat_id=message.chat.id,
+                                  user_id=message.reply_to_message.from_user.id)
+    if not user:
+        await message.reply("У пользователя отсутствуют варны!")
+        return
+    await message.reply(f"У пользователя "
+                        f"{message.reply_to_message.from_user.first_name} "
+                        f"[{user.warns}/3] варнов!")
