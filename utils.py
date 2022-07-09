@@ -1,7 +1,7 @@
 from sqlmodel import create_engine, SQLModel, Session, select
 
 from globals import Globals
-from models import ChatMember, User
+from models import ChatMember, User, ChatSettings
 
 
 def init_db():
@@ -54,6 +54,25 @@ def create_user(user_id: int) -> User | None:
         session.add(user)
         session.commit()
     return user
+
+
+def get_chatsettings_or_none(chat_id: int) -> ChatSettings | None:
+    engine = Globals.db_engine
+    with Session(engine) as session:
+        statement = select(ChatSettings).where(
+            ChatSettings.chat_id == chat_id
+        )
+        chatsettings = session.exec(statement).first()
+    return chatsettings
+
+
+def create_chatsettings(chat_id: int) -> ChatSettings | None:
+    engine = Globals.db_engine
+    with Session(engine) as session:
+        chatsettings = ChatSettings(chat_id=chat_id)
+        session.add(chatsettings)
+        session.commit()
+    return chatsettings
 
 
 def save_model(model: SQLModel) -> None:

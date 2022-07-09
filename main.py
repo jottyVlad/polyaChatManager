@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher
 
 from config import BOT_TOKEN, SENTRY_DSN
 from globals import Globals
+from routers.settings_router import settings_router
 from routers.ban_router import ban_router
 from routers.help_router import help_router
 from routers.mute_router import mute_router
@@ -30,6 +31,8 @@ dp.include_router(ban_router)
 dp.include_router(roleplay_router)
 dp.include_router(warn_router)
 dp.include_router(registration_router)
+dp.include_router(settings_router)
+
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

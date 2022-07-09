@@ -4,6 +4,7 @@ from typing import Optional
 from aiogram import Router, types
 
 from filters.chattype_filter import ChatType
+from utils import get_chatsettings_or_none, create_chatsettings
 
 roleplay_router = Router()
 roleplay_router.message.bind_filter(ChatType)
@@ -58,7 +59,16 @@ async def process_roleplay_command(message: types.Message, text: str, smile: Opt
 @roleplay_router.message(text_startswith=list(roleplay_commands.keys()), text_ignore_case=True)
 async def roleplay_handler(message: types.Message):
     try:
+        chatsettings = get_chatsettings_or_none(message.chat.id)
+        if not chatsettings:
+            chatsettings = create_chatsettings(message.chat.id)
+
         command = roleplay_commands[message.text.split()[0].lower()]
+
+        if command.is_nsfw and not chatsettings.allowed_nsfw:
+            await message.answer("NSFW команды отключены!")
+            return
+
         await process_roleplay_command(message,
                                        command.text,
                                        command.smile)

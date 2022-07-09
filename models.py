@@ -12,3 +12,9 @@ class ChatMember(SQLModel, table=True):
     chat_id: int
     user_id: int
     warns: int = Field(default=0)
+
+
+class ChatSettings(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    chat_id: int
+    allowed_nsfw: bool = Field(default=False)
