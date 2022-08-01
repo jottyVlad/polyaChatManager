@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 
 
 class BaseRepository(ABC):
-    session: Session
+    def __init__(self, session: Session):
+        self.session = session
 
     @abstractmethod
     def create(self, **kwargs):

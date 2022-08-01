@@ -5,9 +5,6 @@ from repositories.base_repository import BaseRepository
 
 
 class UserRepository(BaseRepository):
-    def __init__(self, session):
-        self.session = session
-
     def create(self, user_id: int, money: int = 0):
         try:
             statement = (insert(User).

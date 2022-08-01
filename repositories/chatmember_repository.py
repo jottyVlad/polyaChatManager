@@ -6,9 +6,6 @@ from repositories.base_repository import BaseRepository
 
 
 class ChatMemberRepository(BaseRepository):
-    def __init__(self, session: Session):
-        self.session = session
-
     def create(self, chat_id: int, user_id: int, warns: int = 0):
         try:
             statement = (insert(ChatMember).
