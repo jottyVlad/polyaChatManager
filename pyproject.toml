@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "polyachatmanager"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = ["jotty <bard143games@gmail.com>"]
 
@@ -8,7 +8,7 @@ authors = ["jotty <bard143games@gmail.com>"]
 python = "^3.10"
 aiogram = "^3.0.0a18"
 python-dotenv = "*"
-sqlmodel = "*"
+sqlalchemy = "*"
 alembic = "*"
 sentry-sdk = "*"
 

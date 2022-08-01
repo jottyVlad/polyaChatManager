@@ -1,18 +1,20 @@
-import asyncio
 import logging
 
 import sentry_sdk
 from aiogram import Bot, Dispatcher
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from config import BOT_TOKEN, SENTRY_DSN
-from globals import Globals
+from models import Base
+from repositories.chatmember_repository import ChatMemberRepository
+from repositories.user_repository import UserRepository
 from routers.ban_router import ban_router
 from routers.help_router import help_router
 from routers.mute_router import mute_router
 from routers.registration_router import registration_router
 from routers.roleplay_router import roleplay_router
 from routers.warn_router import warn_router
-from utils import init_db
 
 sentry_sdk.init(
     dsn=SENTRY_DSN,
@@ -32,8 +34,16 @@ dp.include_router(warn_router)
 dp.include_router(registration_router)
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    Globals()
-    engine = init_db()
-    Globals.db_engine = engine
-    dp.run_polling(bot)
+    engine = create_engine('sqlite:///bot.db')
+    Base.metadata.create_all(engine)
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    session = Session()
+
+    user_repository = UserRepository(session)
+    chatmember_repository = ChatMemberRepository(session)
+
+    dp.run_polling(bot,
+                   user_repository=user_repository,
+                   chatmember_repository=chatmember_repository)
+    session.close()

@@ -2,7 +2,7 @@ from aiogram import Router, types, Bot
 
 from filters.adminperm_filter import UserAdminPermissionRequired
 from filters.chattype_filter import ChatType
-from utils import get_chatmember_or_none, create_chatmember, save_model
+from repositories.chatmember_repository import ChatMemberRepository
 
 warn_router = Router()
 
@@ -11,7 +11,8 @@ warn_router.message.bind_filter(UserAdminPermissionRequired)
 
 
 @warn_router.message(commands=["warn"])
-async def warn_handler(message: types.Message):
+async def warn_handler(message: types.Message,
+                       chatmember_repository: ChatMemberRepository):
     bot = Bot.get_current()
     is_admin = (await bot.get_chat_member(message.chat.id, (await bot.me()).id)).status == "administrator"
     if not is_admin:
@@ -29,38 +30,39 @@ async def warn_handler(message: types.Message):
         await message.reply("Нельзя заварнить меня, я ведь и обидеться могу =(")
         return
 
-    user = get_chatmember_or_none(chat_id=message.chat.id,
-                                  user_id=message.reply_to_message.from_user.id)
+    chatmember = chatmember_repository.get(chat_id=message.chat.id,
+                                           user_id=message.reply_to_message.from_user.id)
 
-    if not user:
-        user = await create_chatmember(chat_id=message.chat.id,
-                                       user_id=message.reply_to_message.from_user.id,
-                                       warns=1)
-        await message.reply(f"Варн [{user.warns}/3] выдан пользователю "
+    if not chatmember:
+        chatmember_repository.create(chat_id=message.chat.id,
+                                           user_id=message.reply_to_message.from_user.id,
+                                           warns=1)
+        await message.reply(f"Варн [1/3] выдан пользователю "
                             f"{message.reply_to_message.from_user.first_name}")
 
-    elif user.warns >= 2:
+    elif chatmember.warns >= 2:
         if is_admin:
             await bot.ban_chat_member(message.chat.id,
                                       message.reply_to_message.from_user.id)
 
             await message.reply("Пользователь был забанен за "
                                 "достижение им максимального количества варнов")
-            user.warns = 0
+            chatmember.warns = 0
         else:
-            user.warns += 1
-            await message.reply(f"Варн пользователю выдан, их {user.warns}, "
+            chatmember.warns += 1
+            await message.reply(f"Варн пользователю выдан, их {chatmember.warns}, "
                                 "но у бота нет прав администратора, "
                                 "чтобы его забанить")
     else:
-        user.warns += 1
-        await message.reply(f"Варн [{user.warns}/3] выдан пользователю")
+        chatmember.warns += 1
+        await message.reply(f"Варн [{chatmember.warns}/3] выдан пользователю")
 
-        save_model(user)
+        chatmember_repository.save(chatmember)
 
 
 @warn_router.message(commands=["remwarn"])
-async def remwarn_handler(message: types.Message):
+async def remwarn_handler(message: types.Message,
+                          chatmember_repository: ChatMemberRepository):
     bot = Bot.get_current()
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека которого нужно заварнить")
@@ -73,45 +75,46 @@ async def remwarn_handler(message: types.Message):
         await message.reply("Нельзя разварнить меня, я и так без варнов =)")
         return
 
-    user = get_chatmember_or_none(chat_id=message.chat.id,
-                                  user_id=message.reply_to_message.from_user.id)
+    chatmember = chatmember_repository.get(chat_id=message.chat.id,
+                                           user_id=message.reply_to_message.from_user.id)
 
-    if not user:
+    if not chatmember:
         await message.reply("У пользователя отсутствуют варны!")
 
-    elif user.warns == 0:
+    elif chatmember.warns == 0:
         await message.reply("У пользователя отсутствуют варны!")
 
     else:
-        user.warns -= 1
+        chatmember.warns -= 1
         await message.reply(f"Варн у пользователя снят, "
-                            f"теперь их [{user.warns}/3]")
+                            f"теперь их [{chatmember.warns}/3]")
 
-        save_model(user)
+        chatmember_repository.save(chatmember)
 
 
 @warn_router.message(commands=["warns"])
-async def warns_handler(message: types.Message):
+async def warns_handler(message: types.Message,
+                        chatmember_repository: ChatMemberRepository):
     bot = Bot.get_current()
     if not message.reply_to_message \
             or message.reply_to_message.from_user.id == message.from_user.id:
-        user = get_chatmember_or_none(chat_id=message.chat.id,
-                                      user_id=message.from_user.id)
+        chatmember = chatmember_repository.get(chat_id=message.chat.id,
+                                               user_id=message.from_user.id)
 
-        if not user:
+        if not chatmember:
             await message.reply("У пользователя отстутствуют варны!")
             return
-        await message.reply(f"У пользователя {message.from_user.first_name} [{user.warns}/3] варнов!")
+        await message.reply(f"У пользователя {message.from_user.first_name} [{chatmember.warns}/3] варнов!")
         return
     elif message.reply_to_message.from_user.id == (await bot.me()).id:
         await message.reply("У меня нет варнов, очевидно")
         return
 
-    user = get_chatmember_or_none(chat_id=message.chat.id,
-                                  user_id=message.reply_to_message.from_user.id)
-    if not user:
+    chatmember = chatmember_repository.get(chat_id=message.chat.id,
+                                           user_id=message.reply_to_message.from_user.id)
+    if not chatmember:
         await message.reply("У пользователя отсутствуют варны!")
         return
     await message.reply(f"У пользователя "
                         f"{message.reply_to_message.from_user.first_name} "
-                        f"[{user.warns}/3] варнов!")
+                        f"[{chatmember.warns}/3] варнов!")
