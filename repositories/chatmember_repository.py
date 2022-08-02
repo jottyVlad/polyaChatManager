@@ -1,42 +1,17 @@
-from sqlalchemy import insert, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy import update
 
 from models import ChatMember
 from repositories.base_repository import BaseRepository
+from repositories.operations import CreateOperationMixin, \
+    GetOperationMixin, \
+    SaveOperationMixin
 
 
-class ChatMemberRepository(BaseRepository):
-    def create(self, chat_id: int, user_id: int, warns: int = 0):
-        try:
-            statement = (insert(ChatMember).
-                         values(chat_id=chat_id,
-                                user_id=user_id,
-                                warns=warns))
-            self.session.execute(statement)
-            self.session.commit()
-        except:  # noqa
-            self.session.rollback()
-            raise ValueError("Can't create chatmember object")
-
-    def get(self, chat_id: int, user_id: int):
-        try:
-            statement = (select(ChatMember).
-                         where(ChatMember.chat_id == chat_id,
-                               ChatMember.user_id == user_id))
-
-            result = self.session.execute(statement).scalar()
-        except:  # noqa
-            raise ValueError
-        return result
-
-    def save(self, chatmember: ChatMember):
-        try:
-            self.session.add(chatmember)
-            self.session.commit()
-        except: # noqa
-            self.session.rollback()
-            raise ValueError("Can't save ChatMember object")
-
+class ChatMemberRepository(BaseRepository,
+                           CreateOperationMixin,
+                           GetOperationMixin,
+                           SaveOperationMixin):
+    model = ChatMember
 
     def change_warns(self, chat_id: int, user_id: int, warns: int):
         try:
