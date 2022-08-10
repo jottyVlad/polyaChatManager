@@ -6,7 +6,7 @@ authors = ["jotty <bard143games@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-aiogram = "^3.0.0a18"
+aiogram = "^3.0.0b3"
 python-dotenv = "*"
 sqlalchemy = "*"
 alembic = "*"

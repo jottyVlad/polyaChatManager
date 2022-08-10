@@ -23,7 +23,7 @@ class CreateOperationMixin(BaseOperation):
 
 class GetOperationMixin(BaseOperation):
 
-    def get(self, **kwargs):
+    def get(self, **kwargs) -> DeclarativeMetaType:
         statement = (select(self.model).
                      filter_by(**kwargs))
         result = self.session.execute(statement).scalars().first()

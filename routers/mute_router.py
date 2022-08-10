@@ -17,6 +17,10 @@ async def mute_handler(message: types.Message):
     bot = Bot.get_current()
     admins = [i.user for i in await bot.get_chat_administrators(message.chat.id)]
 
+    if message.from_user not in admins:
+        await message.answer("Мьютить могут только администраторы!")
+        return
+
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека, которого надо замьютить")
         return
@@ -39,6 +43,10 @@ async def mute_handler(message: types.Message):
 async def unmute_handler(message: types.Message):
     bot = Bot.get_current()
     admins = [i.user for i in await bot.get_chat_administrators(message.chat.id)]
+
+    if message.from_user not in admins:
+        await message.answer("Размьютить могут только администраторы!")
+        return
 
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека, которого надо размьютить")

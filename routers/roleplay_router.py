@@ -4,6 +4,8 @@ from typing import Optional
 from aiogram import Router, types
 
 from filters.chattype_filter import ChatType
+from models import ChatSettings
+from repositories.chatsettings_repository import ChatSettingsRepository
 
 roleplay_router = Router()
 roleplay_router.message.bind_filter(ChatType)
@@ -37,7 +39,9 @@ roleplay_commands: dict[str, RoleplayCommandSettings] = {
 }
 
 
-async def process_roleplay_command(message: types.Message, text: str, smile: Optional[str] = None):
+async def process_roleplay_command(message: types.Message,
+                                   text: str,
+                                   smile: Optional[str] = None):
     additional = ""
     if len(message.text.split()) > 1:
         additional = " ".join(message.text.split()[1:])
@@ -55,10 +59,17 @@ async def process_roleplay_command(message: types.Message, text: str, smile: Opt
         return
 
 
-@roleplay_router.message(text_startswith=list(roleplay_commands.keys()), text_ignore_case=True)
-async def roleplay_handler(message: types.Message):
+@roleplay_router.message(text_startswith=list(roleplay_commands.keys()),
+                         text_ignore_case=True)
+async def roleplay_handler(message: types.Message,
+                           chatsettings_repository: ChatSettingsRepository):
+    chatsettings: ChatSettings = chatsettings_repository.get(chat_id=message.chat.id)
+    if not chatsettings.roleplay_enabled:
+        return
     try:
         command = roleplay_commands[message.text.split()[0].lower()]
+        if command.is_nsfw and not chatsettings.nsfw_enabled:
+            return
         await process_roleplay_command(message,
                                        command.text,
                                        command.smile)

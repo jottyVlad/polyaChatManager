@@ -15,6 +15,12 @@ async def warn_handler(message: types.Message,
                        chatmember_repository: ChatMemberRepository):
     bot = Bot.get_current()
     is_admin = (await bot.get_chat_member(message.chat.id, (await bot.me()).id)).status == "administrator"
+
+    admins = [i.user for i in await bot.get_chat_administrators(message.chat.id)]
+    if message.from_user not in admins:
+        await message.answer("Варнить могут только администраторы!")
+        return
+
     if not is_admin:
         await message.reply("Если у бота нет прав администратора, "
                             "то, по достижении максимального количества варнов [3/3] "
@@ -66,6 +72,11 @@ async def remwarn_handler(message: types.Message,
     bot = Bot.get_current()
     if not message.reply_to_message:
         await message.reply("Перешлите сообщение человека которого нужно заварнить")
+        return
+
+    admins = [i.user for i in await bot.get_chat_administrators(message.chat.id)]
+    if message.from_user not in admins:
+        await message.answer("Снимать варн могут только администраторы!")
         return
 
     if message.reply_to_message.from_user.id == message.from_user.id:
