@@ -8,3 +8,4 @@ if os.path.exists(dotenv_path):
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 SENTRY_DSN = os.getenv("SENTRY_DSN")
+CONNECTION_STRING = os.getenv("CONNECTION_STRING")

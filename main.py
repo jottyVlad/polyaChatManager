@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from config import BOT_TOKEN, SENTRY_DSN
+from config import BOT_TOKEN, SENTRY_DSN, CONNECTION_STRING
 from middlewares.chat_middleware import MessageMiddleware
 from models import Base
 from repositories.chatmember_repository import ChatMemberRepository
@@ -41,7 +41,7 @@ dp.message.middleware(MessageMiddleware())
 
 
 if __name__ == '__main__':
-    engine = create_engine('sqlite:///bot.db')
+    engine = create_engine(CONNECTION_STRING)
     Base.metadata.create_all(engine)
     Session = sessionmaker()
     Session.configure(bind=engine)
